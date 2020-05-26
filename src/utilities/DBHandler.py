@@ -4,9 +4,9 @@ from tinydb import TinyDB, Query
 
 # Manages the interface with database for table -> categoryEntryDB
 async def parseCategoryEntries(category, entryList):
-     db = TinyDB('databases/categoryEntryDB.json')
-     categoryEntryDB = db.table('ApiEntries')
-     for entry in entryList:
+    db = TinyDB('databases/categoryEntryDB.json')
+    categoryEntryDB = db.table('ApiEntries')
+    for entry in entryList:
         categoryEntryDB.insert(
             {
                 'API' : entry['API'],
@@ -18,15 +18,21 @@ async def parseCategoryEntries(category, entryList):
                 'ParentCategory': category
             }
         )
+    print()
+    print('Saved batch of entries for category -> ' + category + ' to categoryEntryDB')
+    print()
 
 # Manages the interface with database for table -> parentCategoryDB
 async def parseParentCategories(categoryListOfList):
-     db = TinyDB('databases/parentCategoryDB.json')
-     categoryDB = db.table('CategoryEntries')
-     for categoryList in categoryListOfList:
+    db = TinyDB('databases/parentCategoryDB.json')
+    categoryDB = db.table('CategoryEntries')
+    for categoryList in categoryListOfList:
         for category in categoryList:
             categoryDB.insert(
                 {
                     'Category': category
                 }
             )        
+    print()    
+    print('Saved batch of categories to parentCategoryDB')
+    print()      
