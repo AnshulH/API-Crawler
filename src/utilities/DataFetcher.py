@@ -4,23 +4,24 @@ import json
 import urllib
 from datetime import datetime, date, time, timedelta
 from tinydb import TinyDB, Query
+from utilities.DBHandler import parseCategoryEntries, parseParentCategories
+from utilities.ResponseFormatter import getResponseJson
+from utilities.SessionTimeManager import sleepTimeout, checkTokenExpiration
+from constants.UrlConstants import AUTH_TOKEN_URL, CATEGORY_FETCH_URL, ENTRY_FETCH_URL
 
 async def fetch(session, url, payload, headers):
     async with session.get(url, data = payload, headers = headers) as response:
         return await response.read()
 
-async def sleepTimeout(sleep):
-    await asyncio.sleep(sleep)
-    return datetime.now().timestamp()
-    
 async def getToken():
     async with aiohttp.ClientSession() as session:
-        html = await fetch(session, 'https://public-apis-api.herokuapp.com/api/v1/auth/token', '', '')
+        html = await fetch(session, AUTH_TOKEN_URL, '', '')
         result = json.loads(html.decode('utf-8'))
         token = result["token"]
         print('Token Obtained -> ' + token)
         return token, datetime.now().timestamp()
 
+# Fetch all parent categories and save them to database
 async def getCategories():
     async with aiohttp.ClientSession() as session:
         page = 1 # Beginning with first page
@@ -32,30 +33,19 @@ async def getCategories():
                 currTimeStamp = await sleepTimeout(60)
             if(await checkTokenExpiration(currTimeStamp, tokenTimeStamp) == True):
                 token, tokenTimeStamp = await getToken()
-            url = 'https://public-apis-api.herokuapp.com/api/v1/apis/categories?page='
+            url = CATEGORY_FETCH_URL
             url += str(page)
             headers = {"Authorization": 'Basic ' + str(token)}
             response = await fetch(session, url, '', headers)
             ResponseJson = getResponseJson(response)
             result.append(ResponseJson['categories'])
-            # print(result)
             if(len(ResponseJson['categories']) < 10):
+                await parseParentCategories(result)
                 currTimeStamp = await sleepTimeout(60)
                 return result, page + 1
-            page = page + 1     
+            page = page + 1        
 
-def getResponseJson(response):
-    return json.loads(response.decode('utf-8'))
-
-def parseCategoryEntries(category, entryList, db):
-    print(entryList)
-    print()    
-
-async def checkTokenExpiration(currTimeStamp ,tokenTimeStamp):
-    if(currTimeStamp - tokenTimeStamp > 5):
-        return True
-    return False     
-
+# For each category get all pages of entries and save them to database
 async def getEntryForCategory(category, currpage, reqCounter, tokenTimeStamp, token):
     async with aiohttp.ClientSession() as session:
         page = 1 # Beginning with first page
@@ -72,7 +62,7 @@ async def getEntryForCategory(category, currpage, reqCounter, tokenTimeStamp, to
                 currTimeStamp = await sleepTimeout(60)
 
             args = {"page" : page, "category" : category}
-            url = "https://public-apis-api.herokuapp.com/api/v1/apis/entry?{}".format(urllib.parse.urlencode(args))
+            url = ENTRY_FETCH_URL.format(urllib.parse.urlencode(args))
             headers = {"Authorization": 'Basic ' + str(token)}
             
             response = await fetch(session, url, '', headers)
@@ -82,7 +72,7 @@ async def getEntryForCategory(category, currpage, reqCounter, tokenTimeStamp, to
                 currTimeStamp = await sleepTimeout(60)
 
             responseJson = getResponseJson(response)
-            parseCategoryEntries(category, responseJson['categories'], '')
+            await parseCategoryEntries(category, responseJson['categories'])
 
             if(len(responseJson['categories']) < 10):
                 return reqCounter, tokenTimeStamp
