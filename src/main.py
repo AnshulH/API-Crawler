@@ -4,10 +4,12 @@ import json
 import urllib
 from datetime import datetime, date, time, timedelta
 from tinydb import TinyDB, Query
-from utilities.DataFetcher import getEntryForCategory, sleepTimeout, fetch, getToken, getCategories, checkTokenExpiration, parseCategoryEntries, getResponseJson 
+from utilities.DataFetcher import fetch, getToken, getCategories, getEntryForCategory
+from utilities.DBHandler import parseCategoryEntries, parseParentCategories
+from utilities.ResponseFormatter import getResponseJson
+from utilities.SessionTimeManager import sleepTimeout, checkTokenExpiration
 
 if __name__ ==  '__main__':
-    categoryEntryDB = TinyDB('categoryEntryDB.json')
     loop = asyncio.get_event_loop()
     categoryListOfList, page = loop.run_until_complete(getCategories())
     token, tokenTimeStamp = loop.run_until_complete(getToken())
@@ -19,4 +21,4 @@ if __name__ ==  '__main__':
                 reqCounter = reqCounter + 1
             reqCounter, tokenTimeStamp = loop.run_until_complete(getEntryForCategory(category, page, reqCounter, tokenTimeStamp, token))
 
-    print('complete')
+    print('Completed Processing')
