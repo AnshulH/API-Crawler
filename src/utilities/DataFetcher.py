@@ -9,10 +9,13 @@ from utilities.ResponseFormatter import getResponseJson
 from utilities.SessionTimeManager import sleepTimeout, checkTokenExpiration
 from constants.UrlConstants import AUTH_TOKEN_URL, CATEGORY_FETCH_URL, ENTRY_FETCH_URL
 
+# Makes a GET call to the specified url with params
 async def fetch(session, url, payload, headers):
     async with session.get(url, data = payload, headers = headers) as response:
         return await response.read()
 
+# Fetches token from public api url from postman
+# Exp time -> 5 mins
 async def getToken():
     async with aiohttp.ClientSession() as session:
         html = await fetch(session, AUTH_TOKEN_URL, '', '')
