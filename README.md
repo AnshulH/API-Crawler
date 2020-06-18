@@ -28,9 +28,10 @@ More reference - Public APIs github repo (https://github.com/public-apis/public-
 
 ### Things to Improve with time / TODO List
 
-- Database is not scalable for more large number of entries. Use Scalable Db framework.
+- Database is not scalable for more large number of entries. Use another Scalable Db framework.
 - Need to implement checks while writing to db to avoid copies.
 - A few unnecessary token calls are bring made and can be avoided.
 - Implement better async code to speed up processing.
 - Use docker to run the code.
+- Improve async implementation
 
