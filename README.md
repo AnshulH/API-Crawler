@@ -1,4 +1,4 @@
-# Public-APIs-List-Crawler
+# Basic Public APIs List Crawler
 
 This is an api crawler that fetches public apis data from [POSTMAN](https://documenter.getpostman.com/view/4796420/SzmZczsh?version=latest). Support for rate limiting and pagination. 
 
