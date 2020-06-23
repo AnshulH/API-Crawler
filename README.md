@@ -33,5 +33,3 @@ More reference - Public APIs github repo (https://github.com/public-apis/public-
 - A few unnecessary token calls are bring made and can be avoided.
 - Implement better async code to speed up processing.
 - Use docker to run the code.
-- Improve async implementation
-
